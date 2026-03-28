@@ -178,7 +178,7 @@
 <header>
   <div class="proj-label">郑州 · 管城区 · 预售信息公示分析</div>
   <h1>电建洺悦融圆</h1>
-  <div class="proj-sub">数据来源：郑房交易网 360fc.cn · 全部15栋完整数据</div>
+  <div class="proj-sub">数据来源：郑房交易网 360fc.cn · 全部15栋HTML精确解析</div>
 </header>
 
 <div class="tabs-wrap"><div class="tabs" id="tabs">
@@ -204,10 +204,10 @@
 <div class="panel active" id="panel-overview">
   <div class="cards">
     <div class="card"><div class="cn c-gold">15</div><div class="cl">小区总楼栋</div></div>
-    <div class="card"><div class="cn c-blue">1,450</div><div class="cl">住宅总套数</div></div>
-    <div class="card"><div class="cn c-red">1,360</div><div class="cl">已售套数</div></div>
-    <div class="card"><div class="cn c-orange">53</div><div class="cl">可售未售</div></div>
-    <div class="card"><div class="cn c-green">93.8%</div><div class="cl">综合销售率</div></div>
+    <div class="card"><div class="cn c-blue">1,414</div><div class="cl">住宅总套数</div></div>
+    <div class="card"><div class="cn c-red">1,354</div><div class="cl">已售套数</div></div>
+    <div class="card"><div class="cn c-orange">60</div><div class="cl">可售未售</div></div>
+    <div class="card"><div class="cn c-green">95.8%</div><div class="cl">综合销售率</div></div>
   </div>
 
   <div class="legend">
@@ -230,9 +230,9 @@
     <tfoot>
       <tr>
         <td colspan="4">合计（15栋）</td>
-        <td>1,450</td><td style="color:var(--red)">1,360</td>
-        <td style="color:var(--orange)">53</td><td>37</td>
-        <td colspan="2">综合销售率 <strong>93.8%</strong></td>
+        <td>1,414</td><td style="color:var(--red)">1,354</td>
+        <td style="color:var(--orange)">60</td><td>102</td>
+        <td colspan="2">综合销售率 <strong>95.8%</strong></td>
       </tr>
     </tfoot>
   </table>
@@ -243,10 +243,10 @@
   <div style="margin-top:28px;">
     <div class="sec-title">核心结论 <span class="sec-label">KEY FINDINGS</span></div>
     <div class="findings">
-      <div class="finding-item"><span class="fi-icon">🏆</span><span>综合销售率 <strong style="color:var(--green)">93.8%</strong>，2号、3号、14号楼已 <strong style="color:var(--green)">100% 售罄</strong>，去化整体优秀。</span></div>
-      <div class="finding-item"><span class="fi-icon">📦</span><span>存量分布集中：13号楼剩余最多 <strong style="color:var(--red)">14套</strong>，占未售总量26%；5号楼剩余9套，两楼合计占未售总量的43%。</span></div>
-      <div class="finding-item"><span class="fi-icon">📐</span><span>户型差异显著：高层刚需（99-130㎡）去化极佳，销售率97.1%；含商业/大户型楼栋（4/5/6/8/16号）去化稍慢，平均约86.8%。</span></div>
-      <div class="finding-item"><span class="fi-icon">🏠</span><span>7号楼销售率最低 <strong style="color:var(--red)">87.5%</strong>（143㎡大户型），未售4套分布在1701、302、201、202室。</span></div>
+      <div class="finding-item"><span class="fi-icon">🏆</span><span>综合销售率 <strong style="color:var(--green)">95.8%</strong>，2号、3号、4号、14号楼已 <strong style="color:var(--green)">100% 售罄</strong>，去化整体优秀。</span></div>
+      <div class="finding-item"><span class="fi-icon">📦</span><span>存量集中：16号楼剩余最多 <strong style="color:var(--red)">13套</strong>，13号楼14套，5号楼11套，三楼合计占未售总量的63%。</span></div>
+      <div class="finding-item"><span class="fi-icon">📐</span><span>16号楼是小区唯一含 <strong>二室二厅（79-80㎡）</strong> 户型的楼栋，未售13套中11套为小户型，去化相对偏慢。</span></div>
+      <div class="finding-item"><span class="fi-icon">🏠</span><span>7号楼销售率最低 <strong style="color:var(--red)">87.5%</strong>（143㎡大户型），未售4套：1701、302、201、202室。6号楼同为大户型88.9%，未售1层和18层各2套。</span></div>
       <div class="finding-item"><span class="fi-icon">📍</span><span>未售房源位置规律：多集中在<strong>顶层、底层和低楼层</strong>，中间楼层基本售罄，符合典型销售规律。</span></div>
     </div>
   </div>
@@ -283,36 +283,42 @@ const buildings = {
     exact:true
   },
   '4': {
-    permit:'5716', floor:19, total:127, saled:116, unsold:1, canotsale:10, rate:91.3,
-    huxing:['三室二厅 99-143㎡'],
-    unsoldList:[{room:'待确认',area:'待确认',note:'截图数据'}],
-    cannotList:['1703','1705（不可售）','107','108（底层）','21层全层（顶层公区）'],
-    exact:false
+    permit:'5716', floor:20, total:116, saled:116, unsold:0, canotsale:11, rate:100,
+    huxing:['三室二厅 99.34㎡','三室二厅 128.62㎡'],
+    unsoldList:[],
+    cannotList:['2101楼梯间','2102电梯机房','2103电梯机房','2104电梯机房','2105楼梯间','2001','2006','1703','1705','107变电室','108风井'],
+    exact:true
   },
   '5': {
-    permit:'5716', floor:34, total:142, saled:124, unsold:9, canotsale:9, rate:87.3,
-    huxing:['三室二厅 99-143㎡'],
+    permit:'5716', floor:34, total:133, saled:122, unsold:11, canotsale:9, rate:91.7,
+    huxing:['三室二厅 99.8㎡','三室二厅 129.21㎡'],
     unsoldList:[
-      {room:'3401',area:'待确认',note:'34层'},
-      {room:'3403',area:'待确认',note:'34层'},
-      {room:'3404',area:'待确认',note:'34层'},
-      {room:'1501',area:'待确认',note:'15层'},
-      {room:'2604',area:'待确认',note:'26层'},
-      {room:'其余4套',area:'待确认',note:'待确认楼层'}
+      {room:'3401',area:'129.21㎡',note:'34层'},
+      {room:'3403',area:'99.8㎡',note:'34层'},
+      {room:'3404',area:'129.21㎡',note:'34层'},
+      {room:'2904',area:'129.21㎡',note:'29层'},
+      {room:'2604',area:'129.21㎡',note:'26层'},
+      {room:'2102',area:'99.8㎡',note:'21层'},
+      {room:'2002',area:'99.8㎡',note:'20层'},
+      {room:'1501',area:'129.21㎡',note:'15层'},
+      {room:'504',area:'129.21㎡',note:'5层'},
+      {room:'101',area:'129.21㎡',note:'1层'},
+      {room:'102',area:'99.8㎡',note:'1层'}
     ],
-    cannotList:['3104','35层全层顶层公区','1层底部若干'],
-    exact:false
+    cannotList:['3501楼梯间','3502电梯机房','3503电梯机房','3504楼梯间','3104','2703','1604','105风井','106风井'],
+    exact:true
   },
   '6': {
-    permit:'5653', floor:18, total:40, saled:32, unsold:4, canotsale:4, rate:80.0,
-    huxing:['三室二厅 142㎡'],
+    permit:'5653', floor:18, total:36, saled:32, unsold:4, canotsale:4, rate:88.9,
+    huxing:['三室二厅 142.52㎡'],
     unsoldList:[
-      {room:'101',area:'待确认',note:'1层'},
-      {room:'1801',area:'待确认',note:'18层'},
-      {room:'其余2套',area:'待确认',note:'待确认'}
+      {room:'1801',area:'142.52㎡',note:'18层'},
+      {room:'1802',area:'142.52㎡',note:'18层'},
+      {room:'101',area:'142.52㎡',note:'1层'},
+      {room:'102',area:'142.52㎡',note:'1层'}
     ],
-    cannotList:['103','104','105（底层商业/风井）','19层顶层公区'],
-    exact:false
+    cannotList:['01电梯机房','103风井','104风井','105风井'],
+    exact:true
   },
   '7': {
     permit:'5692', floor:17, total:32, saled:28, unsold:4, canotsale:0, rate:87.5,
@@ -327,14 +333,14 @@ const buildings = {
     exact:true
   },
   '8': {
-    permit:'5653', floor:18, total:40, saled:34, unsold:2, canotsale:4, rate:85.0,
-    huxing:['三室二厅 142㎡'],
+    permit:'5653', floor:18, total:36, saled:34, unsold:2, canotsale:4, rate:94.4,
+    huxing:['三室二厅 142.52㎡'],
     unsoldList:[
-      {room:'101',area:'待确认',note:'1层'},
-      {room:'102',area:'待确认',note:'1层'}
+      {room:'101',area:'142.52㎡',note:'1层'},
+      {room:'102',area:'142.52㎡',note:'1层'}
     ],
-    cannotList:['1层3格红色（底层商业/风井）','19层顶层公区'],
-    exact:false
+    cannotList:['1901机房','103风井','104风井','105风井'],
+    exact:true
   },
   '9': {
     permit:'5582', floor:29, total:113, saled:111, unsold:2, canotsale:8, rate:98.2,
@@ -397,15 +403,25 @@ const buildings = {
     exact:true
   },
   '16': {
-    permit:'5593', floor:24, total:150, saled:133, unsold:7, canotsale:10, rate:88.7,
-    huxing:['三室二厅 99-130㎡'],
+    permit:'5593', floor:24, total:142, saled:129, unsold:13, canotsale:10, rate:90.8,
+    huxing:['二室二厅 79.97㎡','二室二厅 80.28㎡','三室二厅 99.75㎡','三室二厅 129.16㎡'],
     unsoldList:[
-      {room:'2206',area:'待确认',note:'22层'},
-      {room:'2401',area:'待确认',note:'24层'},
-      {room:'其余5套',area:'待确认',note:'待确认楼层'}
+      {room:'2401',area:'129.16㎡',note:'24层'},
+      {room:'2406',area:'129.16㎡',note:'24层'},
+      {room:'2206',area:'129.16㎡',note:'22层'},
+      {room:'202',area:'80.28㎡',note:'2层'},
+      {room:'203',area:'80.28㎡',note:'2层'},
+      {room:'204',area:'80.28㎡',note:'2层'},
+      {room:'205',area:'80.28㎡',note:'2层'},
+      {room:'101',area:'129.16㎡',note:'1层'},
+      {room:'102',area:'79.97㎡',note:'1层'},
+      {room:'103',area:'79.97㎡',note:'1层'},
+      {room:'104',area:'79.97㎡',note:'1层'},
+      {room:'105',area:'79.97㎡',note:'1层'},
+      {room:'106',area:'129.16㎡',note:'1层'}
     ],
-    cannotList:['1层多格','2层202-205','3层306','4层401','25层顶层公区'],
-    exact:false
+    cannotList:['01楼梯间','02电梯机房','03电梯机房','04电梯机房','05楼梯间','401','306','107变电室','108变电室','109排风井'],
+    exact:true
   }
 };
 
