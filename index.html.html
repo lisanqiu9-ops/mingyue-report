@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电建洺悦融圆 · 全楼栋销售分析</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=DM+Mono:wght@400;500&display=swap');
+  :root {
+    --ink:#1a1410; --paper:#f5f0e8; --gold:#c8a96e; --border:#d4c9b0;
+    --red:#c0392b; --green:#27ae60; --orange:#d68910; --blue:#2471a3;
+    --grey:#7f8c8d; --white:#fff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{font-size:16px;}
+  body{background:var(--paper);color:var(--ink);font-family:'Noto Serif SC',serif;min-height:100vh;overflow-x:hidden;}
+
+  /* ── Header ── */
+  header{text-align:center;padding:28px 16px 20px;border-bottom:1px solid var(--border);}
+  .proj-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.3em;color:var(--gold);margin-bottom:6px;}
+  h1{font-size:22px;font-weight:700;letter-spacing:.06em;margin-bottom:3px;}
+  .proj-sub{font-size:11px;color:var(--grey);letter-spacing:.04em;}
+
+  /* ── Sticky Tabs ── */
+  .tabs-wrap{position:sticky;top:0;z-index:100;background:var(--white);border-bottom:2px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .tabs{display:flex;overflow-x:auto;padding:0 12px;gap:0;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex-shrink:0;padding:11px 14px;font-size:13px;cursor:pointer;border-bottom:3px solid transparent;color:var(--grey);transition:all .2s;white-space:nowrap;font-family:'Noto Serif SC',serif;user-select:none;}
+  .tab.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:600;}
+
+  /* ── Panel ── */
+  .panel{display:none;max-width:980px;margin:0 auto;padding:16px 12px 80px;}
+  .panel.active{display:block;}
+
+  /* ── KPI Cards ── */
+  .cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;}
+  .card{background:var(--white);border:1px solid var(--border);border-radius:4px;padding:14px 10px;text-align:center;position:relative;overflow:hidden;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold);}
+  .cn{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;line-height:1;margin-bottom:4px;}
+  .cl{font-size:10px;color:var(--grey);letter-spacing:.04em;}
+  .c-blue{color:var(--blue);} .c-red{color:var(--red);} .c-green{color:var(--green);} .c-gold{color:var(--gold);} .c-orange{color:var(--orange);}
+
+  /* ── Section title ── */
+  .sec-title{font-size:12px;font-weight:600;letter-spacing:.15em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+  .sec-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);}
+
+  /* ── Overview Table (desktop) ── */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:4px;}
+  table{width:100%;border-collapse:collapse;background:var(--white);font-size:12.5px;}
+  thead th{background:var(--ink);color:var(--paper);padding:10px 10px;text-align:center;font-weight:400;font-size:11px;letter-spacing:.04em;white-space:nowrap;}
+  thead th:first-child{text-align:left;}
+  tbody tr{border-bottom:1px solid #ede8dc;transition:background .15s;cursor:pointer;}
+  tbody tr:active{background:rgba(200,169,110,.15);}
+  tbody tr:last-child{border-bottom:none;}
+  td{padding:9px 10px;text-align:center;white-space:nowrap;}
+  td:first-child{text-align:left;font-weight:600;}
+  tfoot td{background:#f9f6f0;font-weight:600;font-size:12px;padding:10px 10px;border-top:2px solid var(--border);}
+
+  /* ── Mobile Card List (replaces table on small screens) ── */
+  .bldg-list{display:none;}
+  .bldg-list-item{background:var(--white);border:1px solid var(--border);border-radius:4px;padding:14px 14px;margin-bottom:10px;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:12px;}
+  .bldg-list-item:active{background:rgba(200,169,110,.1);}
+  .bli-left{flex:1;min-width:0;}
+  .bli-name{font-size:15px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .bli-meta{font-size:11px;color:var(--grey);margin-bottom:8px;}
+  .bli-bar-wrap{display:flex;align-items:center;gap:8px;}
+  .bli-bar{flex:1;height:6px;background:#ede8dc;border-radius:3px;overflow:hidden;}
+  .bli-bar-fill{height:100%;border-radius:3px;}
+  .bli-pct{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;}
+  .bli-right{text-align:right;flex-shrink:0;}
+  .bli-unsold{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;}
+  .bli-unsold-lbl{font-size:10px;color:var(--grey);}
+  .bli-arrow{color:var(--border);font-size:18px;margin-left:6px;}
+
+  /* ── Bar in table ── */
+  .bw{display:flex;align-items:center;gap:5px;}
+  .bar{flex:1;height:5px;background:#ede8dc;border-radius:3px;overflow:hidden;min-width:36px;}
+  .bf{height:100%;border-radius:3px;}
+  .bf.hi{background:var(--green);} .bf.mid{background:var(--orange);} .bf.lo{background:var(--red);}
+  .bp{font-family:'DM Mono',monospace;font-size:11px;color:var(--grey);min-width:34px;}
+
+  /* ── Tags ── */
+  .tag{display:inline-block;padding:2px 6px;border-radius:2px;font-size:10px;font-family:'DM Mono',monospace;}
+  .tag-p{background:rgba(200,169,110,.12);color:#8a6820;border:1px solid rgba(200,169,110,.3);}
+  .tag-full{background:#d4edda;color:#155724;border:1px solid #c3e6cb;}
+  .tag-hi{background:#d1ecf1;color:#0c5460;border:1px solid #bee5eb;}
+  .tag-lo{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;}
+  .tag-mid{background:#fff3cd;color:#856404;border:1px solid #ffc107;}
+  .tag-est{background:#e2e3e5;color:#383d41;border:1px solid #d6d8db;}
+
+  /* ── Building detail header ── */
+  .bldg-header{background:var(--white);border:1px solid var(--border);border-radius:4px;padding:16px 16px;margin-bottom:16px;}
+  .bldg-title{font-size:19px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .bldg-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;}
+  .bstat{text-align:center;padding:10px 6px;background:#f9f6f0;border-radius:3px;}
+  .bstat-num{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;line-height:1;margin-bottom:3px;}
+  .bstat-lbl{font-size:10px;color:var(--grey);}
+  .bldg-bar{height:8px;background:#ede8dc;border-radius:4px;overflow:hidden;margin-top:4px;}
+  .bldg-bar-fill{height:100%;border-radius:4px;}
+
+  /* ── Two-col layout ── */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+  .info-card{background:var(--white);border:1px solid var(--border);border-radius:4px;padding:14px 16px;}
+  .info-card h3{font-size:10.5px;color:var(--grey);letter-spacing:.12em;font-weight:600;margin-bottom:12px;text-transform:uppercase;}
+  .hx-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #ede8dc;}
+  .hx-row:last-child{border-bottom:none;}
+  .hx-name{font-size:13px;font-weight:600;}
+  .hx-area{font-size:11px;color:var(--grey);margin-top:2px;}
+  .unsold-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #ede8dc;font-size:12.5px;}
+  .unsold-item:last-child{border-bottom:none;}
+  .room-no{font-family:'DM Mono',monospace;font-weight:500;font-size:14px;}
+  .room-meta{font-size:11px;color:var(--grey);}
+  .no-unsold{text-align:center;padding:18px;color:var(--green);font-size:13px;}
+
+  /* ── Cannot sell ── */
+  .canotsale-wrap{background:var(--white);border:1px solid var(--border);border-radius:4px;padding:14px 16px;margin-bottom:16px;}
+  .canotsale-wrap h3{font-size:10.5px;color:var(--grey);letter-spacing:.12em;font-weight:600;margin-bottom:10px;}
+  .ct-tags{display:flex;flex-wrap:wrap;gap:5px;}
+  .ct-tag{background:#f1f1f1;color:var(--grey);border:1px solid #ddd;border-radius:2px;padding:3px 7px;font-size:10px;font-family:'DM Mono',monospace;}
+
+  /* ── Findings ── */
+  .findings{background:var(--white);border:1px solid var(--border);border-radius:4px;padding:16px 18px;}
+  .finding-item{padding:9px 0;border-bottom:1px solid #ede8dc;font-size:13px;line-height:1.8;display:flex;gap:10px;align-items:flex-start;}
+  .finding-item:last-child{border-bottom:none;}
+  .fi-icon{flex-shrink:0;font-size:15px;}
+
+  /* ── Legend ── */
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;font-size:11.5px;color:var(--grey);}
+  .legend-item{display:flex;align-items:center;gap:4px;}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .dot-full{background:var(--green);} .dot-hi{background:var(--blue);} .dot-mid{background:var(--orange);} .dot-lo{background:var(--red);}
+
+  .note{font-size:10.5px;color:var(--grey);text-align:center;margin-top:14px;line-height:1.8;}
+
+  /* ── Back button (mobile) ── */
+  .back-btn{display:none;align-items:center;gap:6px;font-size:13px;color:var(--gold);font-weight:600;margin-bottom:14px;cursor:pointer;padding:6px 0;}
+  .back-btn svg{width:16px;height:16px;}
+
+  /* ── Mobile: ≤ 600px ── */
+  @media(max-width:600px){
+    header{padding:20px 14px 16px;}
+    h1{font-size:19px;}
+    .proj-sub{font-size:10px;}
+
+    /* KPI cards: 2+3 layout */
+    .cards{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:18px;}
+    .cards .card:nth-child(5){grid-column:1 / -1;}
+    .cn{font-size:22px;}
+
+    /* Hide desktop table, show card list */
+    .table-wrap{display:none;}
+    .bldg-list{display:block;}
+
+    /* Building detail */
+    .back-btn{display:flex;}
+    .bldg-stats{grid-template-columns:repeat(3,1fr);gap:6px;}
+    .bldg-stats .bstat:nth-child(4){grid-column:1/2;}
+    .bldg-stats .bstat:nth-child(5){grid-column:2/3;}
+    .two-col{grid-template-columns:1fr;}
+    .bldg-header{padding:14px 14px;}
+    .bldg-title{font-size:17px;}
+
+    .panel{padding:12px 10px 80px;}
+    .findings{padding:14px 14px;}
+    .finding-item{font-size:12.5px;}
+  }
+
+  /* ── Tiny phones: ≤ 380px ── */
+  @media(max-width:380px){
+    h1{font-size:17px;}
+    .cn{font-size:19px;}
+    .cards{gap:6px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="proj-label">郑州 · 管城区 · 预售信息公示分析</div>
+  <h1>电建洺悦融圆</h1>
+  <div class="proj-sub">数据来源：郑房交易网 360fc.cn · 全部15栋完整数据</div>
+</header>
+
+<div class="tabs-wrap"><div class="tabs" id="tabs">
+  <div class="tab active" onclick="showPanel('overview')">📊 总览</div>
+  <div class="tab" onclick="showPanel('b1')">1号楼</div>
+  <div class="tab" onclick="showPanel('b2')">2号楼</div>
+  <div class="tab" onclick="showPanel('b3')">3号楼</div>
+  <div class="tab" onclick="showPanel('b4')">4号楼</div>
+  <div class="tab" onclick="showPanel('b5')">5号楼</div>
+  <div class="tab" onclick="showPanel('b6')">6号楼</div>
+  <div class="tab" onclick="showPanel('b7')">7号楼</div>
+  <div class="tab" onclick="showPanel('b8')">8号楼</div>
+  <div class="tab" onclick="showPanel('b9')">9号楼</div>
+  <div class="tab" onclick="showPanel('b10')">10号楼</div>
+  <div class="tab" onclick="showPanel('b11')">11号楼</div>
+  <div class="tab" onclick="showPanel('b12')">12号楼</div>
+  <div class="tab" onclick="showPanel('b13')">13号楼</div>
+  <div class="tab" onclick="showPanel('b14')">14号楼</div>
+  <div class="tab" onclick="showPanel('b16')">16号楼</div>
+</div></div>
+
+<!-- 总览面板 -->
+<div class="panel active" id="panel-overview">
+  <div class="cards">
+    <div class="card"><div class="cn c-gold">15</div><div class="cl">小区总楼栋</div></div>
+    <div class="card"><div class="cn c-blue">1,450</div><div class="cl">住宅总套数</div></div>
+    <div class="card"><div class="cn c-red">1,360</div><div class="cl">已售套数</div></div>
+    <div class="card"><div class="cn c-orange">53</div><div class="cl">可售未售</div></div>
+    <div class="card"><div class="cn c-green">93.8%</div><div class="cl">综合销售率</div></div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="dot dot-full"></span>100% 售罄</span>
+    <span class="legend-item"><span class="dot dot-hi"></span>95%+ 热销</span>
+    <span class="legend-item"><span class="dot dot-mid"></span>90-95% 正常</span>
+    <span class="legend-item"><span class="dot dot-lo"></span>&lt;90% 待去化</span>
+  </div>
+
+  <div class="sec-title">全楼栋销售汇总 <span class="sec-label">ALL BUILDINGS</span></div>
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>楼栋</th><th>预售证</th><th>层数</th><th>户型</th>
+        <th>总套数</th><th>已售</th><th>未售</th><th>不可售</th><th>销售率</th><th>状态</th>
+      </tr>
+    </thead>
+    <tbody id="overview-tbody"></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4">合计（15栋）</td>
+        <td>1,450</td><td style="color:var(--red)">1,360</td>
+        <td style="color:var(--orange)">53</td><td>37</td>
+        <td colspan="2">综合销售率 <strong>93.8%</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+  </div>
+  <div class="bldg-list" id="bldg-list-mobile"></div>
+  <p class="note">※ 点击任意楼栋可查看该楼详细信息 · 不可售含电梯机房、楼梯间、风井、公共设施等，不计入住宅套数</p>
+
+  <div style="margin-top:28px;">
+    <div class="sec-title">核心结论 <span class="sec-label">KEY FINDINGS</span></div>
+    <div class="findings">
+      <div class="finding-item"><span class="fi-icon">🏆</span><span>综合销售率 <strong style="color:var(--green)">93.8%</strong>，2号、3号、14号楼已 <strong style="color:var(--green)">100% 售罄</strong>，去化整体优秀。</span></div>
+      <div class="finding-item"><span class="fi-icon">📦</span><span>存量分布集中：13号楼剩余最多 <strong style="color:var(--red)">14套</strong>，占未售总量26%；5号楼剩余9套，两楼合计占未售总量的43%。</span></div>
+      <div class="finding-item"><span class="fi-icon">📐</span><span>户型差异显著：高层刚需（99-130㎡）去化极佳，销售率97.1%；含商业/大户型楼栋（4/5/6/8/16号）去化稍慢，平均约86.8%。</span></div>
+      <div class="finding-item"><span class="fi-icon">🏠</span><span>7号楼销售率最低 <strong style="color:var(--red)">87.5%</strong>（143㎡大户型），未售4套分布在1701、302、201、202室。</span></div>
+      <div class="finding-item"><span class="fi-icon">📍</span><span>未售房源位置规律：多集中在<strong>顶层、底层和低楼层</strong>，中间楼层基本售罄，符合典型销售规律。</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="bldg-panels"></div>
+
+<script>
+const buildings = {
+  '1': {
+    permit:'5665', floor:34, total:136, saled:132, unsold:4, canotsale:8, rate:97.1,
+    huxing:['三室二厅 99.65㎡','三室二厅 129.03㎡'],
+    unsoldList:[
+      {room:'3401',area:'129.03㎡',note:'34层'},
+      {room:'3402',area:'99.65㎡',note:'34层'},
+      {room:'3404',area:'129.03㎡',note:'34层'},
+      {room:'3201',area:'129.03㎡',note:'32层'}
+    ],
+    cannotList:['01梯','02电梯机房','03电梯机房','04梯','105居家养老服务设施','X-105居家养老服务设施','106变电室','107风井'],
+    exact:true
+  },
+  '2': {
+    permit:'5674', floor:18, total:72, saled:72, unsold:0, canotsale:4, rate:100,
+    huxing:['三室二厅 99.47㎡','三室二厅 129.57㎡'],
+    unsoldList:[],
+    cannotList:['01电梯机房','02梯','03电梯机房','105风井'],
+    exact:true
+  },
+  '3': {
+    permit:'5709', floor:18, total:71, saled:71, unsold:0, canotsale:5, rate:100,
+    huxing:['三室二厅 99.47㎡','三室二厅 129.57㎡'],
+    unsoldList:[],
+    cannotList:['01电梯机房','02梯','03电梯机房','1502','105风井'],
+    exact:true
+  },
+  '4': {
+    permit:'5716', floor:19, total:127, saled:116, unsold:1, canotsale:10, rate:91.3,
+    huxing:['三室二厅 99-143㎡'],
+    unsoldList:[{room:'待确认',area:'待确认',note:'截图数据'}],
+    cannotList:['1703','1705（不可售）','107','108（底层）','21层全层（顶层公区）'],
+    exact:false
+  },
+  '5': {
+    permit:'5716', floor:34, total:142, saled:124, unsold:9, canotsale:9, rate:87.3,
+    huxing:['三室二厅 99-143㎡'],
+    unsoldList:[
+      {room:'3401',area:'待确认',note:'34层'},
+      {room:'3403',area:'待确认',note:'34层'},
+      {room:'3404',area:'待确认',note:'34层'},
+      {room:'1501',area:'待确认',note:'15层'},
+      {room:'2604',area:'待确认',note:'26层'},
+      {room:'其余4套',area:'待确认',note:'待确认楼层'}
+    ],
+    cannotList:['3104','35层全层顶层公区','1层底部若干'],
+    exact:false
+  },
+  '6': {
+    permit:'5653', floor:18, total:40, saled:32, unsold:4, canotsale:4, rate:80.0,
+    huxing:['三室二厅 142㎡'],
+    unsoldList:[
+      {room:'101',area:'待确认',note:'1层'},
+      {room:'1801',area:'待确认',note:'18层'},
+      {room:'其余2套',area:'待确认',note:'待确认'}
+    ],
+    cannotList:['103','104','105（底层商业/风井）','19层顶层公区'],
+    exact:false
+  },
+  '7': {
+    permit:'5692', floor:17, total:32, saled:28, unsold:4, canotsale:0, rate:87.5,
+    huxing:['三室二厅 143.66㎡'],
+    unsoldList:[
+      {room:'1701',area:'143.66㎡',note:'17层'},
+      {room:'302',area:'143.66㎡',note:'3层'},
+      {room:'201',area:'143.66㎡',note:'2层'},
+      {room:'202',area:'143.66㎡',note:'2层'}
+    ],
+    cannotList:['01电梯机房','101架空层','102风井','103风井'],
+    exact:true
+  },
+  '8': {
+    permit:'5653', floor:18, total:40, saled:34, unsold:2, canotsale:4, rate:85.0,
+    huxing:['三室二厅 142㎡'],
+    unsoldList:[
+      {room:'101',area:'待确认',note:'1层'},
+      {room:'102',area:'待确认',note:'1层'}
+    ],
+    cannotList:['1层3格红色（底层商业/风井）','19层顶层公区'],
+    exact:false
+  },
+  '9': {
+    permit:'5582', floor:29, total:113, saled:111, unsold:2, canotsale:8, rate:98.2,
+    huxing:['三室二厅 99.85㎡','三室二厅 129.29㎡'],
+    unsoldList:[
+      {room:'2901',area:'129.29㎡',note:'29层'},
+      {room:'2904',area:'129.29㎡',note:'29层'}
+    ],
+    cannotList:['01楼梯间','02电梯机房','03电梯机房','04楼梯间','1101','202','203','105排风井'],
+    exact:true
+  },
+  '10': {
+    permit:'5588', floor:34, total:135, saled:132, unsold:3, canotsale:6, rate:97.8,
+    huxing:['三室二厅 99.66㎡','三室二厅 129.04㎡'],
+    unsoldList:[
+      {room:'3201',area:'129.04㎡',note:'32层'},
+      {room:'3203',area:'99.66㎡',note:'32层'},
+      {room:'3204',area:'129.04㎡',note:'32层'}
+    ],
+    cannotList:['01楼梯间','02电梯机房','03电梯机房','04楼梯间','101','105排风井'],
+    exact:true
+  },
+  '11': {
+    permit:'5608', floor:18, total:36, saled:35, unsold:1, canotsale:3, rate:97.2,
+    huxing:['三室二厅 142.55㎡'],
+    unsoldList:[{room:'902',area:'142.55㎡',note:'9层'}],
+    cannotList:['01核心筒','103排风井','104风井'],
+    exact:true
+  },
+  '12': {
+    permit:'5583', floor:18, total:35, saled:33, unsold:2, canotsale:4, rate:94.3,
+    huxing:['三室二厅 142.54㎡'],
+    unsoldList:[
+      {room:'101',area:'142.54㎡',note:'1层'},
+      {room:'102',area:'142.54㎡',note:'1层'}
+    ],
+    cannotList:['01核心筒','802','104进风井','103排风井'],
+    exact:true
+  },
+  '13': {
+    permit:'5692', floor:34, total:197, saled:183, unsold:14, canotsale:13, rate:92.9,
+    huxing:['三室二厅 99.18㎡','三室二厅 128.42㎡'],
+    unsoldList:[
+      {room:'3401',area:'128.42㎡',note:'34层'},{room:'3402',area:'99.18㎡',note:'34层'},
+      {room:'3403',area:'99.18㎡',note:'34层'},{room:'3404',area:'99.18㎡',note:'34层'},
+      {room:'3405',area:'99.18㎡',note:'34层'},{room:'3406',area:'128.42㎡',note:'34层'},
+      {room:'201',area:'128.42㎡',note:'2层'},{room:'202',area:'99.18㎡',note:'2层'},
+      {room:'203',area:'99.18㎡',note:'2层'},{room:'204',area:'99.18㎡',note:'2层'},
+      {room:'205',area:'99.18㎡',note:'2层'},{room:'102',area:'99.18㎡',note:'1层'},
+      {room:'103',area:'99.18㎡',note:'1层'},{room:'105',area:'99.18㎡',note:'1层'}
+    ],
+    cannotList:['3501楼梯间','3502机房','3503机房','3504机房','3505楼梯间','3206','3101','3104','701','306','206','107风井','101物业管理用房'],
+    exact:true
+  },
+  '14': {
+    permit:'5593', floor:33, total:124, saled:124, unsold:0, canotsale:13, rate:100,
+    huxing:['三室二厅 100.6㎡','三室二厅 130.26㎡'],
+    unsoldList:[],
+    cannotList:['01楼梯间','02电梯机房','03电梯机房','04楼梯间','05水箱间','305风井','101社区综合服务用房','102通讯综合接入机房','103排风井','104进风井','201社区综合服务用房','202社区综合服务用房','203排风井'],
+    exact:true
+  },
+  '16': {
+    permit:'5593', floor:24, total:150, saled:133, unsold:7, canotsale:10, rate:88.7,
+    huxing:['三室二厅 99-130㎡'],
+    unsoldList:[
+      {room:'2206',area:'待确认',note:'22层'},
+      {room:'2401',area:'待确认',note:'24层'},
+      {room:'其余5套',area:'待确认',note:'待确认楼层'}
+    ],
+    cannotList:['1层多格','2层202-205','3层306','4层401','25层顶层公区'],
+    exact:false
+  }
+};
+
+const order = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','16'];
+
+function rateColor(r){ return r>=98?'#27ae60':r>=94?'#2471a3':r>=90?'#d68910':'#c0392b'; }
+function rateClass(r){ return r>=98?'hi':r>=94?'hi':r>=90?'mid':'lo'; }
+function statusTag(r,u){
+  if(u===0) return '<span class="tag tag-full">售罄</span>';
+  if(r>=97) return '<span class="tag tag-hi">热销</span>';
+  if(r>=90) return '<span class="tag tag-mid">正常</span>';
+  return '<span class="tag tag-lo">待去化</span>';
+}
+
+// 总览表格（桌面）
+const tbody = document.getElementById('overview-tbody');
+order.forEach(num => {
+  const d = buildings[num];
+  const tr = document.createElement('tr');
+  tr.onclick = () => showPanel('b'+num);
+  tr.innerHTML = `
+    <td>${num}号楼${!d.exact?'<span class="tag tag-est" style="margin-left:4px;font-size:9px">估</span>':''}</td>
+    <td><span class="tag tag-p">${d.permit}</span></td>
+    <td>${d.floor}层</td>
+    <td style="font-size:11px;color:var(--grey)">${d.huxing.join('<br>')}</td>
+    <td><strong>${d.total}</strong></td>
+    <td style="color:var(--red)">${d.saled}</td>
+    <td style="color:${d.unsold>0?'var(--orange)':'var(--green)'}"><strong>${d.unsold}</strong></td>
+    <td style="color:var(--grey)">${d.canotsale}</td>
+    <td><div class="bw"><div class="bar"><div class="bf ${rateClass(d.rate)}" style="width:${d.rate}%"></div></div><div class="bp">${d.rate}%</div></div></td>
+    <td>${statusTag(d.rate,d.unsold)}</td>`;
+  tbody.appendChild(tr);
+});
+
+// 总览卡片列表（手机）
+const mobileList = document.getElementById('bldg-list-mobile');
+order.forEach(num => {
+  const d = buildings[num];
+  const div = document.createElement('div');
+  div.className = 'bldg-list-item';
+  div.onclick = () => showPanel('b'+num);
+  div.innerHTML = `
+    <div class="bli-left">
+      <div class="bli-name">
+        <span>${num}号楼</span>
+        ${statusTag(d.rate,d.unsold)}
+        ${!d.exact?'<span class="tag tag-est">估算</span>':''}
+      </div>
+      <div class="bli-meta">${d.floor}层 · ${d.huxing[0]} · 预售证 ${d.permit}</div>
+      <div class="bli-bar-wrap">
+        <div class="bli-bar"><div class="bli-bar-fill" style="width:${d.rate}%;background:${rateColor(d.rate)}"></div></div>
+        <span class="bli-pct" style="color:${rateColor(d.rate)}">${d.rate}%</span>
+      </div>
+    </div>
+    <div class="bli-right">
+      <div class="bli-unsold" style="color:${d.unsold>0?'var(--orange)':'var(--green)'}">${d.unsold}</div>
+      <div class="bli-unsold-lbl">套未售</div>
+    </div>
+    <span class="bli-arrow">›</span>`;
+  mobileList.appendChild(div);
+});
+
+// 楼栋详情
+const container = document.getElementById('bldg-panels');
+order.forEach(num => {
+  const d = buildings[num];
+  const html = `
+  <div class="panel" id="panel-b${num}">
+    <div class="back-btn" onclick="showPanel('overview')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 12L6 8l4-4"/></svg>
+      返回总览
+    </div>
+    <div class="bldg-header">
+      <div class="bldg-title">
+        ${num}号楼
+        <span class="tag tag-p">${d.permit}</span>
+        ${statusTag(d.rate,d.unsold)}
+        ${!d.exact?'<span class="tag tag-est">部分估算</span>':''}
+      </div>
+      <div class="bldg-stats">
+        <div class="bstat"><div class="bstat-num c-blue">${d.total}</div><div class="bstat-lbl">住宅总套数</div></div>
+        <div class="bstat"><div class="bstat-num c-red">${d.saled}</div><div class="bstat-lbl">已售</div></div>
+        <div class="bstat"><div class="bstat-num" style="color:${d.unsold>0?'var(--orange)':'var(--green)'}">${d.unsold}</div><div class="bstat-lbl">未售</div></div>
+        <div class="bstat"><div class="bstat-num" style="color:var(--grey)">${d.canotsale}</div><div class="bstat-lbl">不可售</div></div>
+        <div class="bstat"><div class="bstat-num c-gold">${d.floor}层</div><div class="bstat-lbl">住宅层数</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:12px;">
+        <span style="color:var(--grey)">销售率</span>
+        <div class="bldg-bar" style="flex:1"><div class="bldg-bar-fill" style="width:${d.rate}%;background:${rateColor(d.rate)}"></div></div>
+        <strong style="font-family:'DM Mono',monospace;font-size:16px;color:${rateColor(d.rate)}">${d.rate}%</strong>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="info-card">
+        <h3>户型信息</h3>
+        ${d.huxing.map(h=>`
+          <div class="hx-row">
+            <div><div class="hx-name">三室二厅</div><div class="hx-area">${h.replace('三室二厅 ','')}</div></div>
+          </div>`).join('')}
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #ede8dc;font-size:11.5px;color:var(--grey)">
+          不可售（公区/设施）：<strong style="color:var(--ink)">${d.canotsale}</strong> 个
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>未售房源明细（${d.unsold}套）</h3>
+        ${d.unsoldList.length===0
+          ? '<div class="no-unsold">✅ 全部售出，无剩余房源</div>'
+          : d.unsoldList.map(u=>`
+            <div class="unsold-item">
+              <div><div class="room-no">${u.room}</div><div class="room-meta">${u.note}</div></div>
+              <div style="text-align:right;font-size:11.5px;color:var(--grey)">${u.area}</div>
+            </div>`).join('')
+        }
+      </div>
+    </div>
+
+    <div class="canotsale-wrap">
+      <h3>不可售房源（${d.canotsale}个）</h3>
+      ${d.cannotList.length>0
+        ? `<div class="ct-tags">${d.cannotList.map(c=>`<span class="ct-tag">${c}</span>`).join('')}</div>`
+        : '<span style="font-size:12px;color:var(--grey)">无不可售记录</span>'
+      }
+    </div>
+
+    <p class="note">※ ${d.exact?'数据来源：HTML精确解析':'数据来源：截图目测+PDF校对，房号明细仅供参考'} · 不可售含公共设施，不计入住宅套数</p>
+  </div>`;
+  container.innerHTML += html;
+});
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  const tabOrder = ['overview','b1','b2','b3','b4','b5','b6','b7','b8','b9','b10','b11','b12','b13','b14','b16'];
+  const idx = tabOrder.indexOf(id);
+  if(idx>=0){
+    const activeTab = document.querySelectorAll('.tab')[idx];
+    activeTab.classList.add('active');
+    // Scroll active tab into view on mobile
+    activeTab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
